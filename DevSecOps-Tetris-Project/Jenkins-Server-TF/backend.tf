@@ -6,7 +6,7 @@ terraform {
     encrypt      = true
     use_lockfile = true
   }
-  required_version = ">=1.13.3"
+  required_version = ">= 1.13.3"
   required_providers {
     aws = {
       version = ">= 6.23.0"
