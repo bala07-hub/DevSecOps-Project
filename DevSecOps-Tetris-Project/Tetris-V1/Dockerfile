@@ -1,23 +1,30 @@
-# Use the official Node.js 16 image as the base image
-FROM node:16
+# ---------- 1) Build Stage ----------
+# Use official Node 16 image to install deps and build the React app
+FROM node:16 AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock) to the container
+# Install dependencies first (leverages Docker layer caching)
 COPY package*.json ./
+RUN npm ci --no-audit --no-fund
 
-# Install project dependencies
-RUN npm install
-
-# Copy the rest of the application code to the container
+# Copy the rest of the source and build
 COPY . .
-
-# Build the React app
 RUN npm run build
 
-# Expose the port that the app will run on (usually 3000 by default)
-EXPOSE 3000
+# ---------- 2) Runtime Stage ----------
+# Use a tiny Nginx image to serve static files
+FROM nginx:alpine AS runner
+# that supports client-side routing for SPAs
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start the React app when the container starts
-CMD [ "npm", "start" ]
+# Copy the production build from the builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Expose port 80 (Nginx default)
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
