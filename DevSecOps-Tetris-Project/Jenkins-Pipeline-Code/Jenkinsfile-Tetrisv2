@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git branch: 'master', url: 'https://github.com/bala07-hub/DevSecOps-Project/tree/main/DevSecOps-Tetris-Project'
+                git branch: 'master', url: 'https://github.com/bala07-hub/DevSecOps-Project/DevSecOps-Tetris-Project.git'
             }
         }
         stage('Sonarqube Analysis') {
